@@ -1,8 +1,38 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+import numpy as np
 from collections import namedtuple
 Item = namedtuple("Item", ['index', 'value', 'weight'])
+
+def greedy(capacity, items):
+    current_weight = 0
+    items_taken = [0]*len(items)
+    value = 0
+    counter = 0
+    value_weight_ratios = []
+
+    for item in items:
+        value_weight_ratios.append(item.value / item.weight)
+
+    while current_weight < capacity:
+        next_item_index = np.argmax(value_weight_ratios)
+
+        if items[next_item_index].weight + current_weight < capacity:
+            items_taken[next_item_index] = 1
+            value += items[next_item_index].value
+            current_weight += items[next_item_index].weight
+
+        else:
+            counter += 1
+
+        value_weight_ratios[next_item_index] = 0
+        
+        if counter == len(items):
+            break
+    
+    return items_taken, value
+
+
 
 def solve_it(input_data):
     # Modify this code to run your optimization algorithm
@@ -23,15 +53,7 @@ def solve_it(input_data):
 
     # a trivial algorithm for filling the knapsack
     # it takes items in-order until the knapsack is full
-    value = 0
-    weight = 0
-    taken = [0]*len(items)
-
-    for item in items:
-        if weight + item.weight <= capacity:
-            taken[item.index] = 1
-            value += item.value
-            weight += item.weight
+    taken, value = greedy(capacity, items)
     
     # prepare the solution in the specified output format
     output_data = str(value) + ' ' + str(0) + '\n'
